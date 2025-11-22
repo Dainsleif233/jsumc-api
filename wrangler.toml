@@ -1,2 +1,2 @@
-compatibility_flags = ["nodejs_compat"]
+name = "mcping"compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-07-09"
