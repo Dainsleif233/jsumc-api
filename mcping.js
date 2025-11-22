@@ -155,21 +155,36 @@ export default class MinecraftServerPing {
 
     async #connect() {
         return new Promise((resolve, reject) => {
+            const onTimeout = () => {
+                cleanup();
+                reject(new Error('Connection timeout'));
+                this.#socket.destroy();
+            };
+
+            const onError = (err) => {
+                cleanup();
+                reject(err);
+            };
+
+            const onConnect = () => {
+                cleanup();
+                resolve();
+            };
+
+            const cleanup = () => {
+                this.#socket.removeListener('timeout', onTimeout);
+                this.#socket.removeListener('error', onError);
+                this.#socket.removeListener('connect', onConnect);
+            };
+
             this.#socket = createConnection({
                 host: this.#resolvedHost,
                 port: this.#resolvedPort
-            }, resolve);
+            }, onConnect);
 
             this.#socket.setTimeout(5000);
-            
-            this.#socket.on('timeout', () => {
-                reject(new Error('Connection timeout'));
-                this.#socket.destroy();
-            });
-
-            this.#socket.on('error', (err) => {
-                reject(err);
-            });
+            this.#socket.on('timeout', onTimeout);
+            this.#socket.on('error', onError);
         });
     }
 
@@ -202,7 +217,7 @@ export default class MinecraftServerPing {
     }
 
     async #receivePacket() {
-        return new Promise((resolve, _) => {
+        return new Promise((resolve, reject) => {
             let received = Buffer.alloc(0);
             let packetLength = null;
             let lengthBytes = 0;
@@ -221,13 +236,31 @@ export default class MinecraftServerPing {
                 }
 
                 if (received.length >= lengthBytes + packetLength) {
-                    this.#socket.removeListener('data', onData);
+                    cleanup();
                     const packetData = received.subarray(lengthBytes, lengthBytes + packetLength);
                     resolve(packetData);
                 }
             };
 
+            const onTimeout = () => {
+                cleanup();
+                reject(new Error('Read timeout'));
+            };
+
+            const onError = (err) => {
+                cleanup();
+                reject(err);
+            };
+
+            const cleanup = () => {
+                this.#socket.removeListener('data', onData);
+                this.#socket.removeListener('timeout', onTimeout);
+                this.#socket.removeListener('error', onError);
+            };
+
             this.#socket.on('data', onData);
+            this.#socket.on('timeout', onTimeout);
+            this.#socket.on('error', onError);
         });
     }
 
