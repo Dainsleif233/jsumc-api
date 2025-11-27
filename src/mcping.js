@@ -1,4 +1,4 @@
-import MCPing from './mcping';
+import MCPing from './libs/MinecraftServerPing';
 
 export default async function(server) {
     let mcping;
@@ -14,18 +14,12 @@ export default async function(server) {
 
         return Response.json(
             result,
-            {
-                status: 200,
-                headers: { 'Access-Control-Allow-Origin': '*' }
-            }
+            { status: 200 }
         );
     } catch (e) {
         return new Response(
             e.message,
-            {
-                status: 500,
-                headers: { 'Access-Control-Allow-Origin': '*' }
-            }
+            { status: 500 }
         );
     }
 }

@@ -1,11 +1,11 @@
-import mcping from './main';
+// import mcping from './src/mcping';
 
-export default {
-    async fetch(request) {
-        if (request.method !== 'GET') return;
+// export default {
+//     async fetch(request) {
+//         if (request.method !== 'GET') return;
         
-        const server = new URL(request.url).pathname.substring(1);
+//         const server = new URL(request.url).pathname.substring(1);
 
-        return mcping(server);
-    }
-};
+//         return mcping(server);
+//     }
+// };
