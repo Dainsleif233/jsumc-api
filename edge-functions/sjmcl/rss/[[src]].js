@@ -7,5 +7,5 @@ export async function onRequestGet(ctx) {
     else
         console.log(params);
 
-    return;
+    return new Response(JSON.stringify(params), { status: 200 });
 }
