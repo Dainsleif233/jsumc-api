@@ -1,4 +1,5 @@
-import { SJMCLPost, SJMCLSourceInfo } from "../libs/sjmcl";
+import { SJMCLPost, SJMCLSourceInfo } from "../libs/SJMCL";
+import { parseXMLString, XMLElement } from "../libs/XMLParser";
 
 export default async function (rssUrl: string, originalUrl: string) {
     try {
@@ -14,7 +15,7 @@ export default async function (rssUrl: string, originalUrl: string) {
 
         const response = await fetch(url);
         const rssString = await response.text();
-        const rss = new DOMParser().parseFromString(rssString, 'text/xml');
+        const rss = parseXMLString(rssString, 'text/xml');
         const channel = rss.querySelector('channel');
         if (!channel) throw new Error('RSS channel not found');
 
@@ -25,14 +26,14 @@ export default async function (rssUrl: string, originalUrl: string) {
             name: pick(channel, 'title')
         };
 
-        const items = Array.from(channel.querySelectorAll('item'));
+        const items = channel.querySelectorAll('item');
 
         let next: number | undefined;
         if (items.length > cursor + pageSize) next = cursor + pageSize;
 
         let posts: SJMCLPost[] | undefined;
         if (items.length > cursor) posts = items.slice(cursor, cursor + pageSize - 1).map(item => {
-            const keywords = Array.from(item.querySelectorAll('category')).map(category => category.textContent);
+            const keywords = item.querySelectorAll('category').map(category => category.textContent);
             const date = formatRssDate(pick(item, 'pubDate'));
 
             const post: SJMCLPost = { 
@@ -58,12 +59,12 @@ export default async function (rssUrl: string, originalUrl: string) {
 function getEndpointUrl(url: string) {
     const endpointUrl = new URL(url);
     endpointUrl.searchParams.delete('pageSize');
-    endpointUrl.searchParams.delete('curcor');
+    endpointUrl.searchParams.delete('cursor');
     return endpointUrl.toString();
 }
 
-function pick(root: Element | Document, ...selectors: string[]) {
-    let current: Element | Document | null = root;
+function pick(root: XMLElement, ...selectors: string[]) {
+    let current: XMLElement | null = root;
     
     for (const selector of selectors) {
         if (!current) return '';
