@@ -7,8 +7,10 @@ export async function onRequestGet(ctx: any): Promise<Response>{
     if (Array.isArray(params)) src = params.join('/');
     else src = params;
 
-    const originalUrl: string = ctx.request.url;
+    const srcUrl = new URL(src);
+    const originalUrl = new URL(ctx.request.url);
+    srcUrl.search = originalUrl.search;
 
-    return new Response(originalUrl)
-    return transform(src, originalUrl);
+    return new Response(srcUrl.toString())
+    return transform(srcUrl, originalUrl);
 }

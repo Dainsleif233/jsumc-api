@@ -1,19 +1,16 @@
 import { SJMCLPost, SJMCLResponse, SJMCLSourceInfo } from "../libs/SJMCL";
 import { parseXMLString, XMLElement } from "../libs/XMLParser";
 
-export default async function (rssUrl: string, originalUrl: string) {
+export default async function (rssUrl: URL, originalUrl: URL) {
     try {
-        if (!rssUrl) throw new Error('No RSS URL provided');
-
-        const url = new URL(rssUrl);
-        const pageSize = Number(url.searchParams.get('pageSize')) || 0;
-        url.searchParams.delete('pageSize');
-        const cursor = Number(url.searchParams.get('cursor')) || 0;
-        url.searchParams.delete('cursor');
+        const pageSize = Number(rssUrl.searchParams.get('pageSize')) || 0;
+        rssUrl.searchParams.delete('pageSize');
+        const cursor = Number(rssUrl.searchParams.get('cursor')) || 0;
+        rssUrl.searchParams.delete('cursor');
 
         if (pageSize < 0 || cursor < 0) throw new Error('Invalid page size or cursor');
 
-        const response = await fetch(url);
+        const response = await fetch(rssUrl);
         const rssString = await response.text();
         const rss = parseXMLString(rssString, 'text/xml');
         const channel = rss.querySelector('channel');
@@ -64,11 +61,10 @@ export default async function (rssUrl: string, originalUrl: string) {
     }
 }
 
-function getEndpointUrl(url: string) {
-    const endpointUrl = new URL(url);
-    endpointUrl.searchParams.delete('pageSize');
-    endpointUrl.searchParams.delete('cursor');
-    return endpointUrl.toString();
+function getEndpointUrl(url: URL) {
+    url.searchParams.delete('pageSize');
+    url.searchParams.delete('cursor');
+    return url.toString();
 }
 
 function pick(root: XMLElement, ...selectors: string[]) {
