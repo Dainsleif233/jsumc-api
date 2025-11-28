@@ -1,4 +1,4 @@
-// import transform from '../../../src/sjmcl/rss';
+import transform from '../../../src/sjmcl/rss';
 
 export async function onRequestGet(ctx: any): Promise<Response>{
     const params: string | string[] = ctx.params.src;
@@ -9,6 +9,5 @@ export async function onRequestGet(ctx: any): Promise<Response>{
 
     const request: Request = ctx.request;
 
-    return new Response(`${src}\n${request.url}`);
-    // return transform(src, request.url);
+    return transform(src, request.url);
 }
