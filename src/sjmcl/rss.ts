@@ -6,9 +6,9 @@ export default async function (rssUrl: string, originalUrl: string) {
         if (!rssUrl) throw new Error('No RSS URL provided');
 
         const url = new URL(rssUrl);
-        const pageSize = Number(url.searchParams.get('pageSize') || 0);
+        const pageSize = Number(url.searchParams.get('pageSize')) || 0;
         url.searchParams.delete('pageSize');
-        const cursor = Number(url.searchParams.get('cursor') || 0);
+        const cursor = Number(url.searchParams.get('cursor')) || 0;
         url.searchParams.delete('cursor');
 
         if (pageSize < 0 || cursor < 0) throw new Error('Invalid page size or cursor');
@@ -41,7 +41,7 @@ export default async function (rssUrl: string, originalUrl: string) {
                 abstract: pick(item, 'description') || pick(item, 'title'),
                 createAt: date,
                 id: items.indexOf(item),
-                imageSrc: sourceInfo.iconSrc ? [sourceInfo.iconSrc, 0, 0] : undefined,
+                imageSrc: sourceInfo.iconSrc ? [sourceInfo.iconSrc, 720, 720] : undefined,
                 keywords: keywords.join(','),
                 link: pick(item, 'link'),
                 source: sourceInfo,
