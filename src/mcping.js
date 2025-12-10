@@ -6,16 +6,14 @@ export default async function(server) {
         const host = server.split(':')[0];
         const port = parseInt(server.split(':')[1]);
 
-        mcping = new MCPing(host, port);
+        if (port === 25565) mcping = new MCPing(host);
+        else mcping = new MCPing(host, port);
     } else mcping = new MCPing(server);
 
     try {
         const result = await mcping.ping();
 
-        return Response.json(
-            result,
-            { status: 200 }
-        );
+        return Response.json(result);
     } catch (e) {
         return new Response(
             e.message,

@@ -117,7 +117,7 @@ export default class MinecraftServerPing {
                 this.#port === undefined ||
                 this.#port === null ||
                 Number.isNaN(this.#port) ||
-                this.#port < 0 ||
+                this.#port < 1 ||
                 this.#port > 65535
             ) await this.#resolveSRV();
 
@@ -151,7 +151,7 @@ export default class MinecraftServerPing {
             });
 
             const srv = sortedRecords[0];
-            this.#resolvedHost = srv.name;
+            this.#resolvedHost = str.endsWith(".") ? srv.name.slice(0, -1) : srv.name;
             this.#resolvedPort = srv.port;
         } catch {
             this.#resolvedPort = 25565;
