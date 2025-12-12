@@ -8,7 +8,7 @@
           "value": "*"
         },
         {
-          "key": "X-API-Version",
+          "key": "X-Api-Version",
           "value": "251212a"
         }
       ]

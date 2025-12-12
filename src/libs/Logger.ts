@@ -1,4 +1,4 @@
-type LogLevel = 'info' | 'warn' | 'error';
+type LogLevel = 'INFO' | 'WARN' | 'ERROR';
 
 export default class Logger {
     private name: string;
@@ -7,29 +7,31 @@ export default class Logger {
         this.name = name;
     }
 
-    private log(level: LogLevel, message: string, fields?: Record<string, any>) {
-        const entry = {
-            ts: new Date().toISOString(),
-            level,
-            name: this.name,
-            msg: message,
-            ...(fields || {})
-        };
-        const str = JSON.stringify(entry);
-        if (level === 'error') console.error(str + '\n');
-        else if (level === 'warn') console.warn(str + '\n');
+    private log(level: LogLevel, msg: string, fields: string[]) {
+        let formattedMsg = msg;
+        fields.forEach((field, index) => {
+            const regex = new RegExp(`\\{${index}\\}`, 'g');
+            formattedMsg = formattedMsg.replace(regex, field);
+        });
+        fields.forEach((field) => {
+            formattedMsg = formattedMsg.replace(/\{\}/, field);
+        });
+
+        const str = `[${new Date().toLocaleTimeString()}] [${this.name}/${level}]: ${formattedMsg}`;
+        if (level === 'ERROR') console.error(str + '\n');
+        else if (level === 'WARN') console.warn(str + '\n');
         else console.log(str + '\n');
     }
 
-    info(message: string, fields?: Record<string, any>) {
-        this.log('info', message, fields);
+    info(msg: string, ...fields: string[]) {
+        this.log('INFO', msg, fields);
     }
 
-    warn(message: string, fields?: Record<string, any>) {
-        this.log('warn', message, fields);
+    warn(msg: string, ...fields: string[]) {
+        this.log('WARN', msg, fields);
     }
 
-    error(message: string, fields?: Record<string, any>) {
-        this.log('error', message, fields);
+    error(msg: string, ...fields: string[]) {
+        this.log('ERROR', msg, fields);
     }
 }

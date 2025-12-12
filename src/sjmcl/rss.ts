@@ -3,9 +3,9 @@ import { parseXMLString, XMLElement } from "../libs/XMLParser";
 import Logger from "../libs/Logger";
 
 export default async function (rssUrl: URL, originalUrl: URL) {
+    const log = new Logger('SJMCL/RSS')
+
     try {
-        // const log = logger.child({ name: 'sjmcl/rss' });
-        // const end = startTimer();
         const pageSize = Number(originalUrl.searchParams.get('pageSize')) || 0;
         originalUrl.searchParams.delete('pageSize');
         const cursor = Number(originalUrl.searchParams.get('cursor')) || 0;
@@ -14,7 +14,7 @@ export default async function (rssUrl: URL, originalUrl: URL) {
 
         if (pageSize < 0 || cursor < 0) throw new Error('Invalid page size or cursor');
 
-        // log.info('transform.start', { rssUrl: rssUrl.toString(), pageSize, cursor });
+        log.info('Transform {}:{}:{} started', rssUrl.toString(), pageSize.toString(), cursor.toString());
         const response = await fetch(rssUrl);
         const rssString = await response.text();
         const rss = parseXMLString(rssString, 'text/xml');
@@ -55,7 +55,7 @@ export default async function (rssUrl: URL, originalUrl: URL) {
 
         const sjmclResp: SJMCLResponse = { next, posts, sourceInfo }
 
-        // log.info('transform.success', { next, posts_count: posts?.length ?? 0, duration_ms: end() });
+        log.info('Transform {} successfully', rssUrl.toString());
         return new Response(
             JSON.stringify(sjmclResp),
             {
@@ -63,7 +63,7 @@ export default async function (rssUrl: URL, originalUrl: URL) {
             }
         );
     } catch (e: any) {
-        // logger.error('transform.error', { error: e?.message });
+        log.error('Transform {} error: {}', rssUrl.toString(), e?.message);
         return new Response(e.message, { status: 500 });
     }
 }

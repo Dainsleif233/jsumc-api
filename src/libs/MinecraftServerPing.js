@@ -1,5 +1,6 @@
 import { createConnection } from 'net';
 import { promises as dns } from 'dns';
+import Logger from './Logger';
 
 class VarInt {
     static encode(value) {
@@ -103,6 +104,7 @@ export default class MinecraftServerPing {
     #resolvedHost;
     #resolvedPort;
     #socket;
+    #log;
 
     constructor(host, port) {
         this.#host = host;
@@ -112,6 +114,8 @@ export default class MinecraftServerPing {
     }
 
     async ping() {
+        this.#log = new Logger('MCPing');
+        this.#log.info('Starting ping {}:{}', this.#host, this.#port?.toString());
         try {
             if (
                 this.#port === undefined ||
@@ -121,18 +125,22 @@ export default class MinecraftServerPing {
                 this.#port > 65535
             ) await this.#resolveSRV();
 
+            this.#log.info('Connecting to {}:{}', this.#resolvedHost, this.#resolvedPort.toString());
+
             await this.#connect();
             await this.#handshake();
 
-            const target = `${this.#resolvedHost}:${this.#resolvedPort}`;
+            const target = `${this.#resolvedHost}:${this.#resolvedPort.toString()}`;
             const info = await this.#readPacket();
             let latency;
             try {
                 latency = await this.#measureLatency();
             } catch {
+                this.#log.warn('Failed to measure latency: {}', target);
                 latency = null;
             }
 
+            this.#log.info('Pinged {} successfully', target);
             return { target, info, latency };
         } finally {
             this.#disconnect();
@@ -151,9 +159,10 @@ export default class MinecraftServerPing {
             });
 
             const srv = sortedRecords[0];
-            this.#resolvedHost = str.endsWith(".") ? srv.name.slice(0, -1) : srv.name;
+            this.#resolvedHost = str.endsWith('.') ? srv.name.slice(0, -1) : srv.name;
             this.#resolvedPort = srv.port;
         } catch {
+            this.#log.info('Failed to resolve SRV record for ' + this.#host);
             this.#resolvedPort = 25565;
         }
     }
