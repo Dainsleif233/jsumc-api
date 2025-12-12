@@ -6,6 +6,10 @@
         {
           "key": "Access-Control-Allow-Origin",
           "value": "*"
+        },
+        {
+          "key": "X-API-Version",
+          "value": "251212a"
         }
       ]
     }

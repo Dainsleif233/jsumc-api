@@ -1,8 +1,11 @@
 import mcping from '../../src/mcping';
+import Logger from '../../src/libs/Logger';
 
 export async function onRequestGet(ctx: any): Promise<Response> {
     const params = ctx.params.server;
-    const server = Array.isArray(params) ? params[0] : params;
+    const server: string = Array.isArray(params) ? params[0] : params;
 
-    return mcping(server);
+    const logger = new Logger('ping');
+    logger.info('request.start', { server })
+    return await mcping(server);
 }

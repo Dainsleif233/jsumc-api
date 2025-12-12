@@ -1,4 +1,5 @@
 import transform from '../../../src/sjmcl/rss';
+import Logger from '../../../src/libs/Logger';
 
 export async function onRequestGet(ctx: any): Promise<Response>{
     const params: string | string[] = ctx.params.src;
@@ -10,5 +11,7 @@ export async function onRequestGet(ctx: any): Promise<Response>{
     const srcUrl = new URL(src);
     const originalUrl = new URL(ctx.request.url);
 
-    return transform(srcUrl, originalUrl);
+    const logger = new Logger('sjmcl/rss');
+    logger.info('request.start', { src });
+    return await transform(srcUrl, originalUrl);
 }

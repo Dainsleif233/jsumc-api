@@ -1,8 +1,11 @@
 import { SJMCLPost, SJMCLResponse, SJMCLSourceInfo } from "../libs/SJMCL";
 import { parseXMLString, XMLElement } from "../libs/XMLParser";
+import Logger from "../libs/Logger";
 
 export default async function (rssUrl: URL, originalUrl: URL) {
     try {
+        // const log = logger.child({ name: 'sjmcl/rss' });
+        // const end = startTimer();
         const pageSize = Number(originalUrl.searchParams.get('pageSize')) || 0;
         originalUrl.searchParams.delete('pageSize');
         const cursor = Number(originalUrl.searchParams.get('cursor')) || 0;
@@ -11,6 +14,7 @@ export default async function (rssUrl: URL, originalUrl: URL) {
 
         if (pageSize < 0 || cursor < 0) throw new Error('Invalid page size or cursor');
 
+        // log.info('transform.start', { rssUrl: rssUrl.toString(), pageSize, cursor });
         const response = await fetch(rssUrl);
         const rssString = await response.text();
         const rss = parseXMLString(rssString, 'text/xml');
@@ -51,6 +55,7 @@ export default async function (rssUrl: URL, originalUrl: URL) {
 
         const sjmclResp: SJMCLResponse = { next, posts, sourceInfo }
 
+        // log.info('transform.success', { next, posts_count: posts?.length ?? 0, duration_ms: end() });
         return new Response(
             JSON.stringify(sjmclResp),
             {
@@ -58,6 +63,7 @@ export default async function (rssUrl: URL, originalUrl: URL) {
             }
         );
     } catch (e: any) {
+        // logger.error('transform.error', { error: e?.message });
         return new Response(e.message, { status: 500 });
     }
 }
