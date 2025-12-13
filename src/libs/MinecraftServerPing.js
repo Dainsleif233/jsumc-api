@@ -1,6 +1,6 @@
 import { createConnection } from 'net';
 import { promises as dns } from 'dns';
-// import Logger from '../utils/Logger';
+import Logger from '../utils/Logger';
 
 class VarInt {
     static encode(value) {
@@ -104,18 +104,18 @@ export default class MinecraftServerPing {
     #resolvedHost;
     #resolvedPort;
     #socket;
-    // #log;
+    #log;
 
     constructor(host, port) {
         this.#host = host;
         this.#port = port;
         this.#resolvedHost = host;
         this.#resolvedPort = port;
-        // this.#log = new Logger('MCPing');
+        this.#log = new Logger('MCPing');
     }
 
     async ping() {
-        // this.#log.info('Starting ping {}:{}', this.#host, this.#port?.toString());
+        this.#log.info('Starting ping {}:{}', this.#host, this.#port?.toString());
         try {
             if (
                 this.#port === undefined ||
@@ -125,7 +125,7 @@ export default class MinecraftServerPing {
                 this.#port > 65535
             ) await this.#resolveSRV();
 
-            // this.#log.info('Connecting to {}:{}', this.#resolvedHost, this.#resolvedPort.toString());
+            this.#log.info('Connecting to {}:{}', this.#resolvedHost, this.#resolvedPort.toString());
 
             await this.#connect();
             await this.#handshake();
@@ -136,14 +136,14 @@ export default class MinecraftServerPing {
             try {
                 latency = await this.#measureLatency();
             } catch {
-                // this.#log.warn('Failed to measure latency: {}', target);
+                this.#log.warn('Failed to measure latency: {}', target);
                 latency = null;
             }
 
-            // this.#log.info('Pinged {} successfully', target);
+            this.#log.info('Pinged {} successfully', target);
             return { target, info, latency };
         } catch (e) {
-            // this.#log.error('Failed to ping {}: {}', target, e);
+            this.#log.error('Failed to ping {}: {}', target, e);
         } finally {
             this.#disconnect();
         }
@@ -164,7 +164,7 @@ export default class MinecraftServerPing {
             this.#resolvedHost = str.endsWith('.') ? srv.name.slice(0, -1) : srv.name;
             this.#resolvedPort = srv.port;
         } catch {
-            // this.#log.info('Failed to resolve SRV record for {}', this.#host);
+            this.#log.info('Failed to resolve SRV record for {}', this.#host);
             this.#resolvedPort = 25565;
         }
     }
@@ -174,7 +174,7 @@ export default class MinecraftServerPing {
             const onTimeout = () => {
                 cleanup();
                 reject(() => {
-                    // this.#log.error('Connection timeout');
+                    this.#log.error('Connection timeout');
                     return new Error('Connection timeout')
                 });
                 this.#socket.destroy();
