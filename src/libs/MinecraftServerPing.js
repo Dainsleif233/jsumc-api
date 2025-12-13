@@ -1,6 +1,6 @@
 import { createConnection } from 'net';
 import { promises as dns } from 'dns';
-import Logger from './Logger';
+import Logger from '../utils/Logger';
 
 class VarInt {
     static encode(value) {
@@ -142,6 +142,8 @@ export default class MinecraftServerPing {
 
             this.#log.info('Pinged {} successfully', target);
             return { target, info, latency };
+        } catch (e) {
+            this.#log.error('Failed to ping {}: {}', target, e);
         } finally {
             this.#disconnect();
         }
@@ -162,7 +164,7 @@ export default class MinecraftServerPing {
             this.#resolvedHost = str.endsWith('.') ? srv.name.slice(0, -1) : srv.name;
             this.#resolvedPort = srv.port;
         } catch {
-            this.#log.info('Failed to resolve SRV record for ' + this.#host);
+            this.#log.info('Failed to resolve SRV record for {}', this.#host);
             this.#resolvedPort = 25565;
         }
     }
@@ -171,7 +173,10 @@ export default class MinecraftServerPing {
         return new Promise((resolve, reject) => {
             const onTimeout = () => {
                 cleanup();
-                reject(new Error('Connection timeout'));
+                reject(() => {
+                    this.#log.error('Connection timeout');
+                    return new Error('Connection timeout')
+                });
                 this.#socket.destroy();
             };
 

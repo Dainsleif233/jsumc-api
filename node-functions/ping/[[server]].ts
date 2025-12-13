@@ -1,5 +1,5 @@
 import mcping from '../../src/mcping';
-import Logger from '../../src/libs/Logger';
+import Logger from '../../src/utils/Logger';
 
 export function onRequestGet(ctx: any): Promise<Response> {
     const params = ctx.params.server;

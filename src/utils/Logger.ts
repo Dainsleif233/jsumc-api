@@ -18,9 +18,9 @@ export default class Logger {
         });
 
         const str = `[${new Date().toLocaleTimeString()}] [${this.name}/${level}]: ${formattedMsg}`;
-        if (level === 'ERROR') console.error(str + '\n');
-        else if (level === 'WARN') console.warn(str + '\n');
-        else console.log(str + '\n');
+        if (level === 'ERROR') console.error(str);
+        else if (level === 'WARN') console.warn(str);
+        else console.log(str);
     }
 
     info(msg: string, ...fields: string[]) {
