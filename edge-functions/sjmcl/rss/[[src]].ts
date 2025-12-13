@@ -1,7 +1,7 @@
 import transform from '../../../src/sjmcl/rss';
 import Logger from '../../../src/utils/Logger';
 
-export async function onRequestGet(ctx: any): Promise<Response>{
+export function onRequestGet(ctx: any): Promise<Response>{
     const params: string | string[] = ctx.params.src;
 
     let src: string;
@@ -13,6 +13,5 @@ export async function onRequestGet(ctx: any): Promise<Response>{
 
     const log = new Logger('SJMCL/RSS');
     log.info('Fetching {}', src);
-    return new Response(src);
-    // return transform(srcUrl, originalUrl);
+    return transform(srcUrl, originalUrl);
 }
